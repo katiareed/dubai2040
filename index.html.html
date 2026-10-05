@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<meta name="description" content="Build a printable Dubai 2040 career card with your AI image, stats and learning pathway.">
+<title>Dubai 2040 Career Card Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Sora:wght@600;700;800&display=swap">
+<style>
+/* Layout: a workbench. Form on the left in numbered steps, the live card pinned on the right like a card on a desk mat; the print sheet sits below as the teacher's tray. */
+:root{
+  --navy:#173C6B; --red:#ED1C24; --blue:#3B6FB6;
+  --bg:#EEF2F8; --surface:#FFFFFF; --ink:#1F2A3C; --muted:#5A6B85; --line:#D5DDE9; --field:#F6F8FC; --mat:#DCE4F0; --accentText:#B8141B;
+  --display:'Sora','Segoe UI',system-ui,sans-serif; --body:'Manrope','Segoe UI',system-ui,sans-serif;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0D1626; --surface:#15223A; --ink:#E6ECF5; --muted:#9FB0C9; --line:#2A3B58; --field:#101B2F; --mat:#0A1220; --accentText:#FF6B70; color-scheme:dark } }
+:root[data-theme="dark"]{ --bg:#0D1626; --surface:#15223A; --ink:#E6ECF5; --muted:#9FB0C9; --line:#2A3B58; --field:#101B2F; --mat:#0A1220; --accentText:#FF6B70; color-scheme:dark }
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding-inline:20px;padding-block:28px 48px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px;margin-bottom:22px}
+.eyebrow{font-size:12px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--accentText)}
+h1{font-family:var(--display);font-size:clamp(26px,4vw,38px);line-height:1.1;margin:6px 0 4px;text-wrap:balance;letter-spacing:-.01em}
+.lede{color:var(--muted);max-width:62ch;margin:0}
+.tabs{display:flex;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:4px}
+.tabs button{border:0;background:transparent;color:var(--muted);font:700 14px var(--body);padding:8px 16px;border-radius:999px;cursor:pointer}
+.tabs button[aria-selected="true"]{background:var(--navy);color:#fff}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 420px;gap:24px;align-items:start}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:20px}
+.steps{display:flex;flex-direction:column;gap:14px}
+fieldset{border:1px solid var(--line);border-radius:12px;padding:14px 16px 16px;margin:0;min-width:0}
+legend{display:flex;align-items:center;gap:10px;font-family:var(--display);font-weight:700;font-size:16px;padding:0 6px}
+legend .n{width:26px;height:26px;border-radius:50%;background:var(--navy);color:#fff;font:800 13px var(--body);display:inline-flex;align-items:center;justify-content:center}
+.row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:560px){.row{grid-template-columns:minmax(0,1fr)}}
+label{display:flex;flex-direction:column;gap:5px;font-size:13px;font-weight:700;color:var(--muted);min-width:0}
+input[type=text],textarea,select{font:500 15px var(--body);color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:9px;padding:9px 11px;width:100%}
+textarea{resize:vertical;min-height:70px}
+input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.hint{font-weight:500;font-size:12px;color:var(--muted)}
+.count{font-variant-numeric:tabular-nums;font-weight:600}
+.stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 18px}
+@media (max-width:560px){.stats{grid-template-columns:minmax(0,1fr)}}
+.stat{display:grid;grid-template-columns:120px 1fr 28px;align-items:center;gap:10px;font-size:13px;font-weight:700;color:var(--ink)}
+.stat output{font-variant-numeric:tabular-nums;text-align:right;font-weight:800;color:var(--accentText)}
+input[type=range]{accent-color:var(--red);width:100%}
+.drop{border:2px dashed var(--line);border-radius:12px;padding:16px;display:flex;gap:14px;align-items:center;flex-wrap:wrap;background:var(--field)}
+.drop.over{border-color:var(--blue)}
+.drop p{margin:0;flex:1;min-width:180px;color:var(--muted);font-size:13px}
+.btn{font:800 14px var(--body);border-radius:10px;padding:10px 16px;cursor:pointer;border:1px solid var(--navy);background:var(--navy);color:#fff}
+.btn.alt{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.red{background:var(--red);border-color:var(--red)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.check{flex-direction:row;align-items:center;gap:10px;color:var(--ink);font-size:14px}
+.check input{width:20px;height:20px;accent-color:var(--navy)}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);display:flex;flex-direction:column;gap:14px}
+.mat{background:var(--mat);border-radius:16px;padding:22px 16px;display:flex;justify-content:center}
+.zoom{width:calc(63mm * 1.55);height:calc(88mm * 1.55);max-width:100%}
+.zoom > .card{transform:scale(1.55);transform-origin:0 0}
+@media (max-width:480px){.zoom{width:calc(63mm * 1.2);height:calc(88mm * 1.2)}.zoom > .card{transform:scale(1.2)}.mat{padding:16px 8px}}
+.actions{display:flex;flex-wrap:wrap;gap:8px}
+.actions .btn{flex:1 1 160px}
+.note{font-size:12px;color:var(--muted);margin:0}
+.toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;font-weight:700;font-size:14px;max-width:calc(100% - 32px)}
+.sheet{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;background:var(--mat);border-radius:14px;padding:14px;max-width:520px}
+.slot{aspect-ratio:63/88;border:1px dashed var(--line);border-radius:8px;background:var(--surface);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;max-width:100%}
+.slot img{width:100%;height:100%;object-fit:contain}
+.slot span{font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
+.slot button{position:absolute;top:4px;right:4px;border:0;background:var(--red);color:#fff;border-radius:6px;font:800 11px var(--body);padding:2px 6px;cursor:pointer}
+.teacher{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:24px;align-items:start}
+@media (max-width:900px){.teacher{grid-template-columns:minmax(0,1fr)}}
+.teacher ol{padding-left:20px;margin:8px 0 14px;color:var(--ink)}
+.teacher li{margin-bottom:6px}
+.example{display:inline-block;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;background:var(--red);color:#fff;border-radius:6px;padding:2px 8px}
+.off{position:fixed;left:-10000px;top:0}
+.modal{position:fixed;inset:0;background:rgba(10,18,32,.72);display:flex;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal .box{background:var(--surface);color:var(--ink);border-radius:16px;padding:20px;max-width:560px;width:100%;max-height:calc(100% - 32px);overflow:auto;display:flex;flex-direction:column;gap:14px}
+.modal h2{font-family:var(--display);margin:0;font-size:22px}
+.modal .shot{display:flex;justify-content:center;background:var(--mat);border-radius:12px;padding:14px}
+.modal .shot img{width:260px;max-width:100%;height:auto;border-radius:10px;box-shadow:0 6px 18px rgba(0,0,0,.25);-webkit-touch-callout:default;user-select:auto}
+.modal ol{margin:0;padding-left:20px;display:flex;flex-direction:column;gap:6px}
+.modal .actions .btn{flex:1 1 150px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---- The card (fixed print colours, same design as the printed blank card) ---- */
+.card{width:63mm;height:88mm;border-radius:3mm;overflow:hidden;background:#fff;border:.4mm solid #173C6B;font-family:var(--body);display:flex;flex-direction:column;color:#1F2A3C;position:relative;flex:none}
+.card *{box-sizing:border-box}
+.c-top{background:#173C6B;color:#fff;padding:1.5mm 2.2mm 1.4mm;position:relative;min-height:12mm}
+.c-tag{font-size:4.4pt;letter-spacing:.25mm;color:#fff;background:#ED1C24;display:inline-block;padding:.25mm 1.1mm;border-radius:.8mm;font-weight:800}
+.c-chal{position:absolute;right:2.2mm;top:1.6mm;font-size:4.4pt;font-weight:800;color:#C9D6EA;letter-spacing:.15mm;text-transform:uppercase}
+.c-name{font-family:var(--display);font-size:8.4pt;font-weight:800;line-height:1.15;margin-top:.7mm;white-space:nowrap;overflow:hidden}
+.c-job{font-size:6pt;color:#DCE6F4;font-weight:700;line-height:1.2;white-space:nowrap;overflow:hidden}
+.c-img{height:27mm;background:#F2F5FA;display:flex;align-items:center;justify-content:center;overflow:hidden}
+.c-img img{max-height:27mm;max-width:63mm;display:block}
+.c-img .ph{font-size:5.5pt;color:#8a97ad;text-align:center;line-height:1.35;font-weight:600}
+.c-body{padding:1.2mm 2.2mm 0;flex:1;display:flex;flex-direction:column;gap:.9mm;min-height:0}
+.c-desc{font-size:5.3pt;line-height:1.3;height:7mm;overflow:hidden}
+.c-lbl{font-size:4.4pt;font-weight:800;color:#ED1C24;letter-spacing:.2mm;text-transform:uppercase;margin-bottom:.35mm}
+.c-stats{display:grid;grid-template-columns:1fr 1fr;gap:.55mm 2.2mm}
+.st{display:grid;grid-template-columns:14mm 1fr 2.6mm;align-items:center;gap:.8mm;font-size:4.5pt;font-weight:800;color:#173C6B;white-space:nowrap}
+.st .bar{height:1.3mm;background:#DDE4EE;border-radius:1mm;overflow:hidden}
+.st .bar i{display:block;height:100%;background:#ED1C24;border-radius:1mm}
+.st .v{text-align:right}
+.c-path{display:flex;flex-direction:column;gap:.35mm}
+.pr{display:grid;grid-template-columns:2.6mm 9.5mm 1fr;align-items:center;gap:.7mm;font-size:4.9pt;line-height:1.2}
+.pr .n{width:2.6mm;height:2.6mm;border-radius:50%;background:#173C6B;color:#fff;font-size:3.8pt;font-weight:800;display:flex;align-items:center;justify-content:center}
+.pr b{color:#173C6B;font-weight:800}
+.pr span{overflow:hidden;white-space:nowrap}
+.c-ai{font-size:4.9pt;line-height:1.25;display:flex;flex-direction:column;gap:.3mm}
+.c-ai div{overflow:hidden;white-space:nowrap}
+.c-ai b{color:#173C6B}
+.c-foot{margin-top:auto;border-top:.25mm solid #DDE4EE;padding:.8mm 2.2mm 1mm;font-size:4.4pt;display:flex;align-items:center;gap:1mm;color:#5A6B85;white-space:nowrap;overflow:hidden}
+.c-foot .tick{width:2.3mm;height:2.3mm;border:.3mm solid #173C6B;border-radius:.5mm;display:flex;align-items:center;justify-content:center;font-size:4pt;font-weight:900;color:#173C6B;flex:none;line-height:1}
+.card.back{background:#173C6B;align-items:center;justify-content:center;color:#fff;text-align:center}
+.back .sq{display:grid;grid-template-columns:9mm 9mm;gap:1.2mm;margin-bottom:4mm}
+.back .sq i{width:9mm;height:9mm;border-radius:1.2mm;display:block}
+.back .t1{font-family:var(--display);font-size:12pt;font-weight:800;letter-spacing:.3mm}
+.back .t2{font-size:6.5pt;font-weight:800;color:#C9D6EA;letter-spacing:.4mm;margin-top:1mm}
+.back .t3{font-size:5pt;color:#9fb1cc;margin-top:6mm}
+</style>
+</head>
+<body style="margin:0">
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow">NAIS AI Literacy Foundation &nbsp;|&nbsp; Lesson 1</div>
+      <h1>Dubai 2040 Career Card Builder</h1>
+      <p class="lede">Fill in the six steps, add your AI image, then download your card and submit it. Every card is the same size, so your class can print them as one board game.</p>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" id="tab-make" aria-selected="true" aria-controls="view-make">Make my card</button>
+      <button role="tab" id="tab-sheet" aria-selected="false" aria-controls="view-sheet">Print sheet</button>
+    </div>
+  </header>
+
+  <section id="view-make" role="tabpanel" aria-labelledby="tab-make">
+    <div class="grid">
+      <form class="panel steps" id="form" autocomplete="off">
+        <p class="note"><span class="example">Example</span> &nbsp;This card is filled in as an example. Replace every field with your own work.</p>
+        <fieldset>
+          <legend><span class="n">1</span>My Character</legend>
+          <div class="row">
+            <label for="f-name">Character name <input type="text" id="f-name" maxlength="22"></label>
+            <label for="f-job">Future job <input type="text" id="f-job" maxlength="34"></label>
+          </div>
+          <div class="row" style="margin-top:12px">
+            <label for="f-chal">Team challenge (optional)
+              <select id="f-chal"><option value="">None yet</option><option>Cooler Dubai</option><option>Cleaner Coast</option><option>Smarter Journeys</option><option>Less Waste</option><option>Inclusive Dubai</option></select>
+            </label>
+            <span></span>
+          </div>
+          <label for="f-desc" style="margin-top:12px">Character description (two sentences) <span class="hint">Meet ___, a ___ in Dubai 2040. They help people by ___. <span class="count" id="c-desc"></span></span>
+            <textarea id="f-desc" maxlength="150"></textarea></label>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="n">2</span>My Picture</legend>
+          <div class="drop" id="drop">
+            <button type="button" class="btn alt" id="pick">Upload image</button>
+            <input type="file" id="f-img" accept="image/*" hidden>
+            <p>Upload your AI image, drag it here, or copy it and press Ctrl+V (Cmd+V on Mac). A plain white background works best.</p>
+            <button type="button" class="btn alt" id="clearimg">Remove</button>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="n">3</span>My Stats</legend>
+          <div class="stats" id="stats"></div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="n">4</span>My Learning Pathway</legend>
+          <div class="row">
+            <label for="p0">1. School subjects <input type="text" id="p0" maxlength="40"></label>
+            <label for="p1">2. University degree <input type="text" id="p1" maxlength="40"></label>
+            <label for="p2">3. Skills or certificates <input type="text" id="p2" maxlength="40"></label>
+            <label for="p3">4. First job <input type="text" id="p3" maxlength="40"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="n">5</span>AI and Me</legend>
+          <div class="row">
+            <label for="f-ai">AI helps me to... <input type="text" id="f-ai" maxlength="44"></label>
+            <label for="f-human">I must check or decide... <input type="text" id="f-human" maxlength="44"></label>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend><span class="n">6</span>Fact-Check</legend>
+          <label class="check" for="f-checked"><input type="checkbox" id="f-checked"> I checked one pathway step on a real website</label>
+          <label for="f-src" style="margin-top:10px">Website I checked <input type="text" id="f-src" maxlength="40" placeholder="for example ku.ac.ae"></label>
+        </fieldset>
+      </form>
+
+      <aside class="side">
+        <div class="mat"><div class="zoom" id="zoom"></div></div>
+        <div class="actions">
+          <button type="button" class="btn red" id="dl">Get my card image</button>
+          <button type="button" class="btn alt" id="add">Add to print sheet</button>
+        </div>
+        <p class="note">Press Get my card image, then copy or save the picture and submit it on Schoology. Your work is kept in this browser only, so save your card before you close the page.</p>
+        <button type="button" class="btn alt" id="reset">Start a blank card</button>
+      </aside>
+    </div>
+  </section>
+
+  <section id="view-sheet" role="tabpanel" aria-labelledby="tab-sheet" hidden>
+    <div class="panel teacher">
+      <div>
+        <div class="eyebrow">For the teacher</div>
+        <h2 style="font-family:var(--display);margin:6px 0 4px">Print Sheet</h2>
+        <ol>
+          <li>Upload the card PNGs students submitted (choose many at once), or add cards from the builder.</li>
+          <li>Tick card backs if you will print double-sided.</li>
+          <li>Download the PDF and print at 100% (actual size) on A4 card, 250 to 300 gsm.</li>
+        </ol>
+        <div class="actions" style="margin-bottom:12px">
+          <button type="button" class="btn alt" id="pickmany">Upload card PNGs</button>
+          <input type="file" id="f-many" accept="image/png,image/jpeg" multiple hidden>
+          <button type="button" class="btn alt" id="clearsheet">Clear sheet</button>
+        </div>
+        <label class="check" for="f-backs"><input type="checkbox" id="f-backs" checked> Add a page of card backs after each sheet (lined up for double-sided printing)</label>
+        <div class="actions" style="margin-top:14px"><button type="button" class="btn red" id="pdf">Download print sheet (PDF)</button></div>
+        <p class="note" id="sheetinfo" style="margin-top:10px"></p>
+      </div>
+      <div>
+        <div class="sheet" id="sheet"></div>
+        <p class="note" style="margin-top:8px">Preview of sheet 1. Cards are 63 x 88 mm, nine per A4 page.</p>
+      </div>
+    </div>
+  </section>
+</div>
+<div class="off" id="off"></div>
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="m-title">
+  <div class="box">
+    <h2 id="m-title">Your Card Is Ready</h2>
+    <div class="shot"><img id="m-img" alt="Your career card"></div>
+    <ol>
+      <li><b>Computer:</b> right-click the card and choose <b>Save image as</b>. Or press <b>Copy image</b> and paste it (Ctrl+V) into your Schoology assignment.</li>
+      <li><b>iPad or phone:</b> press and hold the card, then choose <b>Save to Photos</b> or <b>Copy</b>.</li>
+    </ol>
+    <div class="actions">
+      <button type="button" class="btn red" id="m-copy">Copy image</button>
+      <button type="button" class="btn alt" id="m-save">Download PNG</button>
+      <button type="button" class="btn alt" id="m-close">Close</button>
+    </div>
+    <p class="note" id="m-note"></p>
+  </div>
+</div>
+<div class="toast" id="toast" hidden></div>
+
+<script src="vendor/html2canvas.min.js"></script>
+<script src="vendor/jspdf.umd.min.js"></script>
+<script>
+(function(){
+const STATS = ["Tech","Creativity","Teamwork","Problem Solving"];
+const EXAMPLE = {
+  name:"Noor Al Mansoori", job:"Climate Tech Innovator", chal:"Cooler Dubai",
+  desc:"Meet Noor, a Climate Tech Innovator in Dubai 2040. She helps people stay cool by designing shady, smart streets.",
+  img:"", stats:[8,7,9,8],
+  path:["Science, Maths, Geography","Environmental Engineering","Data analysis, design thinking","Junior Sustainability Engineer"],
+  ai:"predict hot spots from sensor data", human:"check the data before the city acts", checked:true, src:"ku.ac.ae"
+};
+const BLANK = {name:"",job:"",chal:"",desc:"",img:"",stats:[5,5,5,5],path:["","","",""],ai:"",human:"",checked:false,src:""};
+const KEY = "d2040-card-v1";
+let state = load() || structuredClone(EXAMPLE);
+let sheet = [];
+
+function load(){ try{ const s = localStorage.getItem(KEY); return s ? JSON.parse(s) : null; }catch(e){ return null; } }
+function persist(){ try{ localStorage.setItem(KEY, JSON.stringify(state)); }catch(e){ try{ localStorage.setItem(KEY, JSON.stringify({...state,img:""})); }catch(_){} } }
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+
+function cardHTML(d){
+  const st = STATS.map((s,i)=>`<div class="st"><span>${s}</span><div class="bar"><i style="width:${d.stats[i]*10}%"></i></div><span class="v">${d.stats[i]}</span></div>`).join("");
+  const path = ["School","University","Skills","First job"].map((l,i)=>`<div class="pr"><div class="n">${i+1}</div><b>${l}</b><span>${esc(d.path[i])}</span></div>`).join("");
+  const img = d.img ? `<img src="${d.img}" alt="">` : `<div class="ph">Your AI image<br>goes here</div>`;
+  return `<div class="card">
+  <div class="c-top"><span class="c-tag">DUBAI 2040</span><span class="c-chal">${esc(d.chal)}</span><div class="c-name">${esc(d.name)||"Character name"}</div><div class="c-job">${esc(d.job)||"Future job"}</div></div>
+  <div class="c-img">${img}</div>
+  <div class="c-body"><div class="c-desc">${esc(d.desc)}</div>
+  <div><div class="c-lbl">My Stats</div><div class="c-stats">${st}</div></div>
+  <div><div class="c-lbl">Learning Pathway</div><div class="c-path">${path}</div></div>
+  <div class="c-ai"><div><b>AI helps me:</b> ${esc(d.ai)}</div><div><b>I must:</b> ${esc(d.human)}</div></div></div>
+  <div class="c-foot"><div class="tick">${d.checked?"&#10003;":""}</div><span>Checked by a human: ${esc(d.src)}</span></div></div>`;
+}
+const BACK = `<div class="card back"><div class="sq"><i style="background:#ED1C24"></i><i style="background:#3B6FB6"></i><i style="background:#3B6FB6"></i><i style="background:#ED1C24"></i></div><div class="t1">DUBAI 2040</div><div class="t2">FUTURE CAREERS</div><div class="t3">AI Literacy Foundation</div></div>`;
+
+// ---- form wiring ----
+$("stats").innerHTML = STATS.map((s,i)=>`<label class="stat" for="s${i}">${s}<input type="range" id="s${i}" min="1" max="10" step="1"><output id="o${i}"></output></label>`).join("");
+const simple = {name:"f-name",job:"f-job",chal:"f-chal",desc:"f-desc",ai:"f-ai",human:"f-human",src:"f-src"};
+function fillForm(){
+  for(const [k,id] of Object.entries(simple)) $(id).value = state[k] || "";
+  state.path.forEach((v,i)=> $("p"+i).value = v);
+  state.stats.forEach((v,i)=>{ $("s"+i).value = v; $("o"+i).textContent = v; });
+  $("f-checked").checked = !!state.checked;
+  render();
+}
+function render(){
+  $("zoom").innerHTML = cardHTML(state);
+  $("c-desc").textContent = `${(state.desc||"").length}/150`;
+  persist();
+}
+$("form").addEventListener("input", e=>{
+  const id = e.target.id;
+  for(const [k,fid] of Object.entries(simple)) if(fid===id) state[k]=e.target.value;
+  if(/^p\d$/.test(id)) state.path[+id[1]] = e.target.value;
+  if(/^s\d$/.test(id)){ state.stats[+id[1]] = +e.target.value; $("o"+id[1]).textContent = e.target.value; }
+  if(id==="f-checked") state.checked = e.target.checked;
+  render();
+});
+$("form").addEventListener("change", e=>{ if(e.target.id==="f-checked"||e.target.id==="f-chal"){ state.checked=$("f-checked").checked; state.chal=$("f-chal").value; render(); } });
+$("form").addEventListener("submit", e=>e.preventDefault());
+
+// ---- image in ----
+function shrink(file){
+  return new Promise((res,rej)=>{
+    const r = new FileReader();
+    r.onload = ()=>{ const im = new Image(); im.onload = ()=>{
+        const m = 700, k = Math.min(1, m/Math.max(im.width, im.height));
+        const c = document.createElement("canvas"); c.width = Math.round(im.width*k); c.height = Math.round(im.height*k);
+        const x = c.getContext("2d"); x.fillStyle="#fff"; x.fillRect(0,0,c.width,c.height); x.drawImage(im,0,0,c.width,c.height);
+        res(c.toDataURL("image/jpeg",0.9)); };
+      im.onerror = ()=>rej(new Error("That file is not an image we can read. Try a PNG or JPG."));
+      im.src = r.result; };
+    r.onerror = ()=>rej(new Error("The file could not be read."));
+    r.readAsDataURL(file);
+  });
+}
+async function takeImage(file){
+  if(!file || !file.type.startsWith("image/")) return toast("Choose an image file (PNG or JPG).");
+  try{ state.img = await shrink(file); render(); toast("Picture added"); }catch(err){ toast(err.message); }
+}
+$("pick").onclick = ()=> $("f-img").click();
+$("f-img").onchange = e=> takeImage(e.target.files[0]);
+$("clearimg").onclick = ()=>{ state.img=""; render(); };
+const drop = $("drop");
+drop.addEventListener("dragover", e=>{ e.preventDefault(); drop.classList.add("over"); });
+drop.addEventListener("dragleave", ()=> drop.classList.remove("over"));
+drop.addEventListener("drop", e=>{ e.preventDefault(); drop.classList.remove("over"); takeImage(e.dataTransfer.files[0]); });
+document.addEventListener("paste", e=>{
+  const item = [...(e.clipboardData?.items||[])].find(i=>i.type.startsWith("image/"));
+  if(item){ e.preventDefault(); takeImage(item.getAsFile()); }
+});
+$("reset").onclick = ()=>{ state = structuredClone(BLANK); fillForm(); toast("Blank card ready"); };
+
+// ---- render to PNG ----
+async function snap(html){
+  if(!window.html2canvas) throw new Error("The image tool did not load. Check your internet and refresh.");
+  await document.fonts.ready;
+  const off = $("off"); off.innerHTML = html;
+  const el = off.firstElementChild;
+  const canvas = await html2canvas(el, {scale:5, backgroundColor:null, useCORS:true, logging:false});
+  off.innerHTML = "";
+  return canvas;
+}
+const toBlob = c => new Promise(r => c.toBlob(r, "image/png"));
+
+// ---- saving: viewer download capability inside Claude, normal download elsewhere ----
+function noDownload(){
+  const msg = "The download button is blocked here. Use Copy image, or right-click the card (press and hold on an iPad) and choose Save image.";
+  if(!$("modal").hidden) $("m-note").textContent = msg; else toast(msg);
+}
+async function saveFile(name, blob){
+  if(window.claude && typeof window.claude.use === "function"){
+    const dl = await window.claude.use("downloads");
+    if(dl){
+      try{ await dl.save({filename:name, data:blob}); toast("Saved"); }
+      catch(err){ if(err && err.code==="declined") return; if(err && err.code==="rate_limited") return toast("A save is already open. Finish it first."); noDownload(); }
+      return;
+    }
+    return noDownload();
+  }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  toast("Downloaded");
+}
+const slug = s => (s||"card").trim().replace(/[^a-z0-9]+/gi,"-").replace(/^-|-$/g,"").slice(0,40) || "card";
+
+let lastBlob = null, lastName = "";
+$("dl").onclick = async ()=>{
+  const b = $("dl"); b.disabled = true; b.textContent = "Making your card...";
+  try{
+    const c = await snap(cardHTML(state));
+    lastBlob = await toBlob(c); lastName = `${slug(state.name)}-career-card.png`;
+    $("m-img").src = c.toDataURL("image/png");
+    $("m-note").textContent = "";
+    $("modal").hidden = false; $("m-copy").focus();
+  }catch(err){ toast(err.message); }
+  finally{ b.disabled = false; b.textContent = "Get my card image"; }
+};
+$("m-copy").onclick = async ()=>{
+  try{
+    if(!navigator.clipboard || !window.ClipboardItem) throw new Error("no clipboard");
+    await navigator.clipboard.write([new ClipboardItem({"image/png": lastBlob})]);
+    $("m-note").textContent = "Copied. Now paste it (Ctrl+V or Cmd+V) into your Schoology assignment or a Google Doc.";
+  }catch(e){
+    $("m-note").textContent = "Copying is blocked on this device. Right-click the card (or press and hold on an iPad) and choose Save image or Copy image.";
+  }
+};
+$("m-save").onclick = async ()=>{
+  $("m-note").textContent = "";
+  await saveFile(lastName, lastBlob);
+};
+$("m-close").onclick = ()=>{ $("modal").hidden = true; $("dl").focus(); };
+document.addEventListener("keydown", e=>{ if(e.key==="Escape" && !$("modal").hidden) $("m-close").click(); });
+$("add").onclick = async ()=>{
+  try{ const c = await snap(cardHTML(state)); sheet.push(c.toDataURL("image/png")); drawSheet(); toast(`Added. ${sheet.length} card${sheet.length>1?"s":""} on the sheet.`); }
+  catch(err){ toast(err.message); }
+};
+
+// ---- print sheet ----
+function drawSheet(){
+  const slots = [];
+  for(let i=0;i<9;i++){
+    const src = sheet[i];
+    slots.push(src ? `<div class="slot"><img src="${src}" alt="Card ${i+1}"><button type="button" data-i="${i}" aria-label="Remove card ${i+1}">X</button></div>` : `<div class="slot"><span>${i+1}</span></div>`);
+  }
+  $("sheet").innerHTML = slots.join("");
+  const pages = Math.max(1, Math.ceil(sheet.length/9));
+  $("sheetinfo").textContent = sheet.length ? `${sheet.length} card${sheet.length>1?"s":""}, ${pages} sheet${pages>1?"s":""} of nine.` : "No cards yet.";
+}
+$("sheet").addEventListener("click", e=>{ const i = e.target.dataset?.i; if(i!==undefined){ sheet.splice(+i,1); drawSheet(); } });
+$("pickmany").onclick = ()=> $("f-many").click();
+$("f-many").onchange = async e=>{
+  for(const f of e.target.files){ try{ sheet.push(await new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(f); })); }catch(_){} }
+  e.target.value = ""; drawSheet();
+};
+$("clearsheet").onclick = ()=>{ sheet = []; drawSheet(); };
+$("pdf").onclick = async ()=>{
+  if(!sheet.length) return toast("Add at least one card first.");
+  if(!window.jspdf) return toast("The PDF tool did not load. Check your internet and refresh.");
+  const b = $("pdf"); b.disabled = true;
+  try{
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF({unit:"mm", format:"a4"});
+    const W=63, H=88, X0=(210-3*W)/2, Y0=(297-3*H)/2;
+    const backs = $("f-backs").checked;
+    const backImg = backs ? (await snap(BACK)).toDataURL("image/png") : null;
+    for(let p=0; p*9<sheet.length; p++){
+      if(p>0) pdf.addPage();
+      const chunk = sheet.slice(p*9, p*9+9);
+      chunk.forEach((src,i)=>{ const x = X0+(i%3)*W, y = Y0+Math.floor(i/3)*H;
+        pdf.addImage(src, src.startsWith("data:image/jpeg")?"JPEG":"PNG", x, y, W, H);
+        pdf.setDrawColor(200); pdf.setLineWidth(0.1); pdf.rect(x, y, W, H); });
+      if(backs){
+        pdf.addPage();
+        chunk.forEach((_,i)=>{ const col = 2-(i%3); const x = X0+col*W, y = Y0+Math.floor(i/3)*H; pdf.addImage(backImg,"PNG",x,y,W,H); });
+      }
+    }
+    await saveFile("dubai-2040-career-cards.pdf", pdf.output("blob"));
+  }catch(err){ toast(err.message || "The PDF could not be made."); }
+  finally{ b.disabled = false; }
+};
+
+// ---- tabs, toast ----
+function show(which){
+  const make = which==="make";
+  $("view-make").hidden = !make; $("view-sheet").hidden = make;
+  $("tab-make").setAttribute("aria-selected", make); $("tab-sheet").setAttribute("aria-selected", !make);
+}
+$("tab-make").onclick = ()=>show("make");
+$("tab-sheet").onclick = ()=>show("sheet");
+if(location.hash==="#sheet") show("sheet");
+window.addEventListener("hashchange", ()=> show(location.hash==="#sheet" ? "sheet" : "make"));
+let tt;
+function toast(msg){ const t=$("toast"); t.textContent=msg; t.hidden=false; clearTimeout(tt); tt=setTimeout(()=>t.hidden=true, msg.length>60?5000:2600); }
+
+fillForm(); drawSheet();
+})();
+</script>
+</body>
+</html>
