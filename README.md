@@ -16,19 +16,19 @@ Everything runs in the student's browser. Nothing is uploaded to a server, there
 
 1. Sign in at github.com.
 2. Click the **+** at the top right and choose **New repository**.
-3. Name it `dubai-2040-career-cards`, choose **Public**, and click **Create repository**.
+3. Name it (this one is `dubai2040`), choose **Public**, and click **Create repository**.
 4. On the new page, click the link **uploading an existing file**.
 5. Unzip the pack on your computer. Open the `dubai-2040-career-cards` folder, select everything inside it (including the `vendor` folder) and drag it into the GitHub upload box. Use Chrome or Edge, which upload folders correctly.
 6. Check that the list shows `index.html` and `vendor/html2canvas.min.js`. Click **Commit changes**.
 7. Go to **Settings**, then **Pages** in the left menu.
 8. Under **Build and deployment**, set **Source** to **Deploy from a branch**, choose the branch **main** and the folder **/ (root)**, then click **Save**.
 9. Wait one to two minutes and refresh the Pages screen. Your link appears at the top:
-   `https://YOUR-USERNAME.github.io/dubai-2040-career-cards/`
+   https://katiareed.github.io/dubai2040/
 
-## Links to Share
+## Live Links
 
-1. **Students:** `https://YOUR-USERNAME.github.io/dubai-2040-career-cards/`
-2. **Teacher print sheet:** the same link with `#sheet` at the end, which opens the Print Sheet tab directly.
+1. **Students:** https://katiareed.github.io/dubai2040/
+2. **Teacher print sheet:** https://katiareed.github.io/dubai2040/#sheet (opens the Print Sheet tab directly).
 
 Post the student link on Schoology or as a QR code on the lesson slide.
 
